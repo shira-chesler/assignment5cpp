@@ -5,14 +5,14 @@
 
 using namespace ariel;
 
-void MagicalContainer::printDescIdx(){
-    Node<int*> *curr = this->prime;
-    while(curr->getIsFinal() == false){
-        std::cout << curr->getIndex() << std::endl;
-        curr = curr->getNext();
-    }
+// void MagicalContainer::printDescIdx(){
+//     Node<int*> *curr = this->prime;
+//     while(curr->getIsFinal() == false){
+//         std::cout << curr->getIndex() << std::endl;
+//         curr = curr->getNext();
+//     }
     
-}
+// }
 
 //MAGIC CONTAINER CLASS
 
@@ -40,9 +40,41 @@ MagicalContainer::MagicalContainer():ascending(nullptr), descending(nullptr), pr
     Node<int*>::insertAtPosition(new Node<int*>(), 0, &(this->prime));
 }
 
+//copy constructor
+MagicalContainer::MagicalContainer(const MagicalContainer& magic)=default;
+
+//move constructor
+MagicalContainer::MagicalContainer(MagicalContainer&& magic)=default;
+
+//assignment operator
+MagicalContainer& MagicalContainer::operator=(const MagicalContainer& magic)=default;
+
+//move assignment operator
+MagicalContainer& MagicalContainer::operator=(MagicalContainer&& magic)=default;
+
 //Destructor
 MagicalContainer::~MagicalContainer(){
-
+    Node<int>* current = this->ascending;
+    while (!current->getIsFinal()) {
+        Node<int>* next = current->getNext();
+        delete current;
+        current = next;
+    }
+    delete current;
+    Node<int*>* curr = this->descending;
+    while (!curr->getIsFinal()) {
+        Node<int*>* next = curr->getNext();
+        delete curr;
+        curr = next;
+    }
+    delete curr;
+    curr = this->prime;
+    while (!curr->getIsFinal()) {
+        Node<int*>* next = curr->getNext();
+        delete curr;
+        curr = next;
+    }
+    delete curr;
 }
 
 //adding an element to the container
@@ -371,16 +403,16 @@ bool MagicalContainer::SideCrossIterator::operator>(const SideCrossIterator &oth
     if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return false;
     if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return true;
     if(this->is_front && other.is_front){
-        //if(this->current_front->getIndex() == 0) return other.current_front->getIndex()==0 ? 0 > 0 : 0 > ((2*other.current_front->getIndex())+1);
+        if(this->current_front->getIndex() == 0) return other.current_front->getIndex()==0 ? false : true;
         return ((2*this->current_front->getIndex())+1) > ((2*other.current_front->getIndex())+1);
     } else if (this->is_front && (!other.is_front)){
-        //if(other.current_back->getIndex()==0) return this->current_front->getIndex()==0 ? 0 > 1 : ((2*this->current_front->getIndex())+1) > 1;
+        if(this->current_front->getIndex()==0) return other.current_back->getIndex()==0 ? false : true;
         return ((2*this->current_front->getIndex())+1) > (2*other.current_back->getIndex());
     } else if ((!this->is_front) && other.is_front){
-        //if(this->current_back->getIndex() == 0) return other.current_front->getIndex()==0 ? 1 > 0 : 1 > ((2*other.current_front->getIndex())+1);
+        if(this->current_back->getIndex() == 0) return other.current_front->getIndex()==0 ? true : false;
         return (2*this->current_back->getIndex()) > ((2*other.current_front->getIndex())+1);
     } else{
-        //if(this->current_back->getIndex() == 0) return other.current_back->getIndex()==0 ? 1 > 0 : 1 > (2*other.current_back->getIndex());
+        if(this->current_back->getIndex() == 0) return other.current_back->getIndex()==0 ? false : true;
         return (2*this->current_back->getIndex()) > (2*other.current_back->getIndex());
     }
 }
@@ -391,16 +423,16 @@ bool MagicalContainer::SideCrossIterator::operator<(const SideCrossIterator &oth
     if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return true;
     if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return false;
     if(this->is_front && other.is_front){
-        //if(this->current_front->getIndex() == 0) return other.current_front->getIndex()==0 ? 0 < 0 : 0 < ((2*other.current_front->getIndex())+1);
+        if(this->current_front->getIndex() == 0) return other.current_front->getIndex()==0 ? false : true;
         return ((2*this->current_front->getIndex())+1) < ((2*other.current_front->getIndex())+1);
     } else if (this->is_front && (!other.is_front)){
-        //if(other.current_back->getIndex()==0) return this->current_front->getIndex()==0 ? 0 < 1 : ((2*this->current_front->getIndex())+1) < 1;
+        if(this->current_front->getIndex()==0) return other.current_back->getIndex()==0 ? true : false;
         return ((2*this->current_front->getIndex())+1) < (2*other.current_back->getIndex());
     } else if ((!this->is_front) && other.is_front){
-        //if(this->current_back->getIndex() == 0) return other.current_front->getIndex()==0 ? 1 < 0 : 1 < ((2*other.current_front->getIndex())+1);
+        if(this->current_back->getIndex() == 0) return other.current_front->getIndex()==0 ? false : true;
         return (2*this->current_back->getIndex()) < ((2*other.current_front->getIndex())+1);
     } else{
-        //if(this->current_back->getIndex() == 0) return other.current_back->getIndex()==0 ? 1 < 0 : 1 < (2*other.current_back->getIndex());
+        if(this->current_back->getIndex() == 0) return other.current_back->getIndex()==0 ? false : true;
         return (2*this->current_back->getIndex()) < (2*other.current_back->getIndex());
     }
 }

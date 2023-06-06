@@ -19,11 +19,15 @@ namespace ariel {
 
         public:
         MagicalContainer();
+        MagicalContainer(const MagicalContainer& magic);
+        MagicalContainer(MagicalContainer&& magic);
+        MagicalContainer& operator=(const MagicalContainer& magic);
+        MagicalContainer& operator=(MagicalContainer&& magic);
         ~MagicalContainer();
         void addElement(int elem);
         void removeElement(int elem);
         int size();
-        void printDescIdx();
+        //void printDescIdx();
 
 
         //itertors

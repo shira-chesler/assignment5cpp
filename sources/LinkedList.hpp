@@ -16,7 +16,7 @@ class Node{
     public:
     Node();
     Node(T data);
-    void setIndex(int i);
+    void setIndex(int idx);
     void setNext(Node<T>* next);
     bool operator>(const Node<T> &other) const;
     bool operator<(const Node<T> &other) const;
@@ -44,8 +44,8 @@ Node<T>::Node(T data){
 }
 
 template <typename T>
-void Node<T>::setIndex(int i){
-    this->index = i;
+void Node<T>::setIndex(int idx){
+    this->index = idx;
 }
 
 template <typename T>
@@ -55,12 +55,12 @@ void Node<T>::setNext(Node<T>* next){
 
 template <typename T>
 bool Node<T>::operator>(const Node<T> &other) const{
-    return this->data > other.data;
+    return this->index() > other.index();
 }
 
 template <typename T>
 bool Node<T>::operator<(const Node<T> &other) const{
-    return this->data < other.data;
+    return this->index() < other.index();
 }
 
 template <>
@@ -71,9 +71,9 @@ bool Node<int*>::operator<(const Node<int*> &other) const;
 
 template <typename T>
 Node<T>* Node<T>::getFinal(Node<T>* head){
-    if(head==nullptr) throw std::runtime_error("ERROR!3");
+    if(head==nullptr) {throw std::runtime_error("ERROR!3");}
     Node<T>* currentNode = head;
-    while (currentNode->final != true) {
+    while (!static_cast<bool>(currentNode->final)) {
         currentNode = currentNode->next;
     }
     return currentNode;
@@ -108,12 +108,12 @@ void Node<T>::insertAtPosition(Node<T>* toAdd, int position, Node<T>** head) {
     Node<T>* currentNode = *head;
     int currentIndex = 0;
 
-    while (currentNode->final != true && currentIndex < position - 1) {
+    while (!static_cast<bool>(currentNode->final) && currentIndex < position - 1) {
         currentNode = currentNode->next;
         currentIndex++;
     }
 
-    if (currentNode->final == true) {
+    if (static_cast<bool>(currentNode->final)) {
         throw std::runtime_error("ERROR!");
         return;
     }
@@ -125,14 +125,14 @@ void Node<T>::insertAtPosition(Node<T>* toAdd, int position, Node<T>** head) {
 
 template <typename T>
 int Node<T>::findPosition(Node<T>* head, T newdata){
-    if (head->final == true) {
+    if (static_cast<bool>(head->final)) {
         return 0;
     }
 
     Node<T>* currentNode = head;
     int position = 0;
 
-    while (currentNode->final != true) {
+    while (!static_cast<bool>(currentNode->final)) {
         if (currentNode->data >= newdata) {
             break;
         }
@@ -149,7 +149,7 @@ void Node<T>::incrementFromPos(Node<T>* head, int position) {
     //__asm__("int3");
     Node<T>* currentNode = head;
     int idx = 0;
-    while (currentNode->final != true) {
+    while (!static_cast<bool>(currentNode->final)) {
         if (idx<position) {
             idx++;
         }
@@ -162,7 +162,7 @@ template <typename T>
 void Node<T>::decreaseFromPos(Node<T>* head, int position) {
     Node<T>* currentNode = head;
     int idx = 0;
-    while (currentNode->final != true) {
+    while (!static_cast<bool>(currentNode->final)) {
         if (idx<position) {
             idx++;
         }
@@ -178,7 +178,7 @@ void Node<T>::removeAtPosition(int position, Node<T>** head) {
         return;
     }
 
-    if ((*head)->final == true) {
+    if (static_cast<bool>((*head)->final)) {
         return;
     }
 
@@ -194,12 +194,12 @@ void Node<T>::removeAtPosition(int position, Node<T>** head) {
     Node<T>* currentNode = *head;
     int currentIndex = 0;
 
-    while (currentNode->final != true && currentIndex < position - 1) {
+    while (!static_cast<bool>(currentNode->final) && currentIndex < position - 1) {
         currentNode = currentNode->next;
         currentIndex++;
     }
 
-    if (currentNode->final == true || currentNode->next->final == true) {
+    if (static_cast<bool>(currentNode->final) || static_cast<bool>(currentNode->next->final)) {
         // Invalid position
         throw std::runtime_error("element doesn't exists");
     }
