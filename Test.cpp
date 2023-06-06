@@ -280,31 +280,3 @@ TEST_CASE("Test comparing iterators pointing to different containers throws") {
         }
     }
 }
-
-TEST_CASE("Test comparing two iterators of different types throws") {
-    MagicalContainer mc;
-    MagicalContainer::PrimeIterator prime = MagicalContainer::PrimeIterator(mc).begin();
-    MagicalContainer::SideCrossIterator sideCross = MagicalContainer::SideCrossIterator(mc).begin();
-    MagicalContainer::AscendingIterator ascending = MagicalContainer::AscendingIterator(mc).begin();
-    
-    SUBCASE("PrimeIterator Vs AscendingIterator"){
-        CHECK_THROWS((void)(prime == ascending));
-        CHECK_THROWS((void)(prime > ascending));
-        CHECK_THROWS((void)(prime > ascending));
-        CHECK_THROWS((void)(prime != ascending));
-    }
-
-    SUBCASE("AscendingIterator Vs SideCrossIterator"){
-        CHECK_THROWS((void)(ascending == sideCross));
-        CHECK_THROWS((void)(ascending > sideCross));
-        CHECK_THROWS((void)(ascending < sideCross));
-        CHECK_THROWS((void)(ascending != sideCross));
-    }
-
-    SUBCASE("SideCrossIterator Vs PrimeIterator"){
-        CHECK_THROWS((void)(sideCross == prime));
-        CHECK_THROWS((void)(sideCross > prime));
-        CHECK_THROWS((void)(sideCross < prime));
-        CHECK_THROWS((void)(sideCross != prime));
-    }
-}

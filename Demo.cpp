@@ -9,7 +9,9 @@ int main() {
     container.addElement(25);
     container.addElement(9);
     container.addElement(3);
-
+    //container.addElement(31);
+    
+    //container.printDescIdx();
     // Print container size
     std::cout << "Size of container: " << container.size() << std::endl;
 
@@ -21,12 +23,13 @@ int main() {
     }
     std::cout << std::endl;
 
+    //__asm__("int3");
     // Use DescendingIterator to display elements in descending order
     std::cout << "Elements in cross order:\n";
     MagicalContainer::SideCrossIterator crossIter(container);
     for (auto it = crossIter.begin(); it != crossIter.end(); ++it) {
         std::cout << *it << ' ';  // 2 25 3 17 9
-    }
+    } 
     std::cout << std::endl;
 
     // Use PrimeIterator to display prime numbers only

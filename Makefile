@@ -4,7 +4,7 @@ CXX=clang++-14
 CXXVERSION=c++2a
 SOURCE_PATH=sources
 OBJECT_PATH=objects
-CXXFLAGS=-std=$(CXXVERSION) -Werror -Wsign-conversion -I$(SOURCE_PATH)
+CXXFLAGS=-std=$(CXXVERSION) -g -Werror -Wsign-conversion -I$(SOURCE_PATH)
 TIDY_FLAGS=-extra-arg=-std=$(CXXVERSION) -checks=bugprone-*,clang-analyzer-*,cppcoreguidelines-*,performance-*,portability-*,readability-*,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-owning-memory --warnings-as-errors=*
 VALGRIND_FLAGS=-v --leak-check=full --show-leak-kinds=all  --error-exitcode=99
 
@@ -18,7 +18,13 @@ run: demo
 demo: Demo.o $(OBJECTS) 
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-test: TestCounter.o Test.o $(OBJECTS)
+test: TestRunner.o StudentTest1.o  $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+mytest: TestRunner.o Test.o  $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+main: Main.o $(OBJECTS) 
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 tidy:
@@ -36,4 +42,3 @@ $(OBJECT_PATH)/%.o: $(SOURCE_PATH)/%.cpp $(HEADERS)
 
 clean:
 	rm -f $(OBJECTS) *.o test* demo*
-	rm -f StudentTest*.cpp
