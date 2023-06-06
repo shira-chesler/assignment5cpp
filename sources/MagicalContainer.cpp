@@ -29,6 +29,7 @@ bool MagicalContainer::isPrime(int elem){
         if (elem % i == 0)
             return false;
     }
+    //std::cout << elem << std::endl;
     return true;
 }
 
@@ -117,11 +118,17 @@ MagicalContainer::AscendingIterator::~AscendingIterator(){
 
 //operator >
 bool MagicalContainer::AscendingIterator::operator>(const AscendingIterator &other) const{
+    if(other.current->getIsFinal() == true && this->current->getIsFinal() == true ) return false;
+    if(other.current->getIsFinal() == true ) return false;
+    if(this->current->getIsFinal()) return true;
     return this->current>other.current;
 }
 
 //operator <
 bool MagicalContainer::AscendingIterator::operator<(const AscendingIterator &other) const{
+    if(other.current->getIsFinal() == true && this->current->getIsFinal() == true ) return false;
+    if(other.current->getIsFinal() == true ) return true;
+    if(this->current->getIsFinal()) return false;
     return this->current<other.current;
 }
 
@@ -231,11 +238,17 @@ MagicalContainer::PrimeIterator::~PrimeIterator(){
 
 //operator >
 bool MagicalContainer::PrimeIterator::operator>(const PrimeIterator &other) const{
+    if(other.current->getIsFinal() == true && this->current->getIsFinal() == true ) return false;
+    if(other.current->getIsFinal() == true ) return false;
+    if(this->current->getIsFinal()) return true;
     return this->current>other.current;
 }
 
 //operator <
 bool MagicalContainer::PrimeIterator::operator<(const PrimeIterator &other) const{
+    if(other.current->getIsFinal() == true && this->current->getIsFinal() == true ) return false;
+    if(other.current->getIsFinal() == true ) return true;
+    if(this->current->getIsFinal()) return false;
     return this->current<other.current;
 }
 
@@ -358,12 +371,16 @@ bool MagicalContainer::SideCrossIterator::operator>(const SideCrossIterator &oth
     if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return false;
     if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return true;
     if(this->is_front && other.is_front){
+        //if(this->current_front->getIndex() == 0) return other.current_front->getIndex()==0 ? 0 > 0 : 0 > ((2*other.current_front->getIndex())+1);
         return ((2*this->current_front->getIndex())+1) > ((2*other.current_front->getIndex())+1);
     } else if (this->is_front && (!other.is_front)){
+        //if(other.current_back->getIndex()==0) return this->current_front->getIndex()==0 ? 0 > 1 : ((2*this->current_front->getIndex())+1) > 1;
         return ((2*this->current_front->getIndex())+1) > (2*other.current_back->getIndex());
     } else if ((!this->is_front) && other.is_front){
+        //if(this->current_back->getIndex() == 0) return other.current_front->getIndex()==0 ? 1 > 0 : 1 > ((2*other.current_front->getIndex())+1);
         return (2*this->current_back->getIndex()) > ((2*other.current_front->getIndex())+1);
     } else{
+        //if(this->current_back->getIndex() == 0) return other.current_back->getIndex()==0 ? 1 > 0 : 1 > (2*other.current_back->getIndex());
         return (2*this->current_back->getIndex()) > (2*other.current_back->getIndex());
     }
 }
@@ -374,29 +391,33 @@ bool MagicalContainer::SideCrossIterator::operator<(const SideCrossIterator &oth
     if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return true;
     if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return false;
     if(this->is_front && other.is_front){
+        //if(this->current_front->getIndex() == 0) return other.current_front->getIndex()==0 ? 0 < 0 : 0 < ((2*other.current_front->getIndex())+1);
         return ((2*this->current_front->getIndex())+1) < ((2*other.current_front->getIndex())+1);
     } else if (this->is_front && (!other.is_front)){
+        //if(other.current_back->getIndex()==0) return this->current_front->getIndex()==0 ? 0 < 1 : ((2*this->current_front->getIndex())+1) < 1;
         return ((2*this->current_front->getIndex())+1) < (2*other.current_back->getIndex());
     } else if ((!this->is_front) && other.is_front){
+        //if(this->current_back->getIndex() == 0) return other.current_front->getIndex()==0 ? 1 < 0 : 1 < ((2*other.current_front->getIndex())+1);
         return (2*this->current_back->getIndex()) < ((2*other.current_front->getIndex())+1);
     } else{
+        //if(this->current_back->getIndex() == 0) return other.current_back->getIndex()==0 ? 1 < 0 : 1 < (2*other.current_back->getIndex());
         return (2*this->current_back->getIndex()) < (2*other.current_back->getIndex());
     }
 }
 
 //operator ==
 bool MagicalContainer::SideCrossIterator::operator==(const SideCrossIterator &other) const{
-    if((other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) && (this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true)) return true;
-    if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return false;
-    if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return false;
+    // if((other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) && (this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true)) return true;
+    // if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return false;
+    // if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return false;
     return !((*this)>other || (*this)<other);
 }
 
 //operator !=
 bool MagicalContainer::SideCrossIterator::operator!=(const SideCrossIterator &other) const{
-    if((other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) && (this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true)) return false;
-    if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return true;
-    if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return true;
+    // if((other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) && (this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true)) return false;
+    // if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return true;
+    // if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return true;
     return !((*this)==other);
 }
 

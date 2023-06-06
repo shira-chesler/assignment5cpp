@@ -20,7 +20,7 @@ int Node<int*>::findPosition(Node<int*>* head, int* newdata){
     }
 
     // If the position is not found, you can return an appropriate error code or value
-    return -1;  // or any other appropriate error code
+    return position;  // or any other appropriate error code
 }
 
 template <>
