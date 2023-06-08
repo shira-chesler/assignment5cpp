@@ -1,5 +1,6 @@
 #include "LinkedList.hpp"
 
+//int* specialization decleration for finding a position to insert a certein element in ascending order
 template <>
 int Node<int*>::findPosition(Node<int*>* head, int* newdata){
     if (head->final == true) {
@@ -21,14 +22,4 @@ int Node<int*>::findPosition(Node<int*>* head, int* newdata){
 
     // If the position is not found, you can return an appropriate error code or value
     return position;  // or any other appropriate error code
-}
-
-template <>
-bool Node<int*>::operator>(const Node<int*> &other) const{
-    return this->index>other.index;
-}
-
-template <>
-bool Node<int*>::operator<(const Node<int*> &other) const{
-    return this->index<other.index;
 }

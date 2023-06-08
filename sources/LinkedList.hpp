@@ -10,6 +10,7 @@ class Node{
     T data;
     int index = -1;
     bool final = false;
+
     void static incrementFromPos(Node<T>* head, int position);
     void static decreaseFromPos(Node<T>* head, int position);
 
@@ -20,66 +21,52 @@ class Node{
     void setNext(Node<T>* next);
     bool operator>(const Node<T> &other) const;
     bool operator<(const Node<T> &other) const;
-    //bool operator>(const Node<int*> &other) const;
-    //bool operator<(const Node<int*> &other) const;
     void static insertAtPosition(Node<T>* toAdd, int position, Node<T>** head);
     void static removeAtPosition(int position, Node<T>** head);
-    //int static findPosition(Node<int*>* head, int* newdata);//specialization
     int static findPosition(Node<T>* head, T newdata);
     T* getDataPoint() {return &data;}
     Node<T>* getNext(){return next;}
     int getIndex() {return index;}
     bool getIsFinal(){return final;}
-    Node<T> static *getFinal(Node<T>* head);
 };
 
+//default constructor
 template <typename T>
 Node<T>::Node(){
 
 }
 
+//constructor
 template <typename T>
 Node<T>::Node(T data){
     this->data = data;
 }
 
+//index setter
 template <typename T>
 void Node<T>::setIndex(int idx){
     this->index = idx;
 }
 
+//next setter
 template <typename T>
-void Node<T>::setNext(Node<T>* next){
+void Node<T>::setNext(Node<T>* next){ 
     this->next = next;
 }
 
+//operator > (comparing by index)
 template <typename T>
 bool Node<T>::operator>(const Node<T> &other) const{
-    return this->index() > other.index();
+    return this->index > other.index;
 }
 
+//operator > (comparing by index)
 template <typename T>
 bool Node<T>::operator<(const Node<T> &other) const{
-    return this->index() < other.index();
+    return this->index < other.index;
 }
 
-template <>
-bool Node<int*>::operator>(const Node<int*> &other) const;
-
-template <>
-bool Node<int*>::operator<(const Node<int*> &other) const;
-
-template <typename T>
-Node<T>* Node<T>::getFinal(Node<T>* head){
-    if(head==nullptr) {throw std::runtime_error("ERROR!3");}
-    Node<T>* currentNode = head;
-    while (!static_cast<bool>(currentNode->final)) {
-        currentNode = currentNode->next;
-    }
-    return currentNode;
-}
-
-
+//function to insert a node at a given position
 template <typename T>
 void Node<T>::insertAtPosition(Node<T>* toAdd, int position, Node<T>** head) {
     if (position < 0) {
@@ -96,6 +83,7 @@ void Node<T>::insertAtPosition(Node<T>* toAdd, int position, Node<T>** head) {
         return;
     }
     
+    // toAdd->end = Node<T>::getFinal(*head);
     toAdd->index = position;
     if (position == 0) {
         // Insert at the beginning
@@ -123,6 +111,7 @@ void Node<T>::insertAtPosition(Node<T>* toAdd, int position, Node<T>** head) {
     Node<T>::incrementFromPos(*head, position+1);
 }
 
+//finding a position to insert a certein element in ascending order
 template <typename T>
 int Node<T>::findPosition(Node<T>* head, T newdata){
     if (static_cast<bool>(head->final)) {
@@ -144,9 +133,9 @@ int Node<T>::findPosition(Node<T>* head, T newdata){
     return position;
 }
 
+//increment indexes of all nodes from a certein position (include)
 template <typename T>
 void Node<T>::incrementFromPos(Node<T>* head, int position) {
-    //__asm__("int3");
     Node<T>* currentNode = head;
     int idx = 0;
     while (!static_cast<bool>(currentNode->final)) {
@@ -158,6 +147,7 @@ void Node<T>::incrementFromPos(Node<T>* head, int position) {
     }
 }
 
+//decreases indexes of all nodes from a certein position (include)
 template <typename T>
 void Node<T>::decreaseFromPos(Node<T>* head, int position) {
     Node<T>* currentNode = head;
@@ -171,6 +161,7 @@ void Node<T>::decreaseFromPos(Node<T>* head, int position) {
     }
 }
 
+//function to delete a node at a given position
 template <typename T>
 void Node<T>::removeAtPosition(int position, Node<T>** head) {
     if (position < 0) {
@@ -210,6 +201,7 @@ void Node<T>::removeAtPosition(int position, Node<T>** head) {
     Node<T>::decreaseFromPos(currentNode->next, position + 1);
 }
 
+//int* specialization decleration for finding a position to insert a certein element in ascending order
 template <>
 int Node<int*>::findPosition(Node<int*>* head, int* newdata);
 

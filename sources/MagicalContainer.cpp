@@ -5,20 +5,12 @@
 
 using namespace ariel;
 
-// void MagicalContainer::printDescIdx(){
-//     Node<int*> *curr = this->prime;
-//     while(curr->getIsFinal() == false){
-//         std::cout << curr->getIndex() << std::endl;
-//         curr = curr->getNext();
-//     }
-    
-// }
-
 //MAGIC CONTAINER CLASS
 
-//if the main container has the element - return its psoition
-//otherwise -1
-int MagicalContainer::contains(int elem){
+//if the container has the element - return -1,
+//otherwise return the position it should be inserted into
+int MagicalContainer::findPositionToInsert(int elem){
+    if(exists(elem)>=0) return -1;
     return Node<int>::findPosition(this->ascending, elem);
 }
 
@@ -29,28 +21,44 @@ bool MagicalContainer::isPrime(int elem){
         if (elem % i == 0)
             return false;
     }
-    //std::cout << elem << std::endl;
     return true;
+}
+
+//checks if the element exists in the container
+int MagicalContainer::exists(int elem){
+    int idx = 0;
+    Node<int>* curr = this->ascending;
+    while (curr->getIsFinal()!=true && *(curr->getDataPoint())!=elem)
+    {
+        idx++;
+        curr = curr->getNext();
+    }
+    if(curr->getIsFinal()) return -1;
+    return idx;
 }
 
 //constucror
 MagicalContainer::MagicalContainer():ascending(nullptr), descending(nullptr), prime(nullptr), num_elem(0){
-    Node<int>::insertAtPosition(new Node<int>(), 0, &(this->ascending));
-    Node<int*>::insertAtPosition(new Node<int*>(), 0, &(this->descending));
-    Node<int*>::insertAtPosition(new Node<int*>(), 0, &(this->prime));
+    //inserting end nodes to each list
+    this->asc_end = new Node<int>();
+    this->desc_end = new Node<int*>();
+    this->prime_end = new Node<int*>();
+    Node<int>::insertAtPosition(this->asc_end, 0, &(this->ascending));
+    Node<int*>::insertAtPosition(this->desc_end, 0, &(this->descending));
+    Node<int*>::insertAtPosition(this->prime_end, 0, &(this->prime));
 }
 
 //copy constructor
 MagicalContainer::MagicalContainer(const MagicalContainer& magic)=default;
 
 //move constructor
-MagicalContainer::MagicalContainer(MagicalContainer&& magic)=default;
+MagicalContainer::MagicalContainer(MagicalContainer&& magic) noexcept=default;
 
 //assignment operator
 MagicalContainer& MagicalContainer::operator=(const MagicalContainer& magic)=default;
 
 //move assignment operator
-MagicalContainer& MagicalContainer::operator=(MagicalContainer&& magic)=default;
+MagicalContainer& MagicalContainer::operator=(MagicalContainer&& magic) noexcept=default;
 
 //Destructor
 MagicalContainer::~MagicalContainer(){
@@ -79,16 +87,14 @@ MagicalContainer::~MagicalContainer(){
 
 //adding an element to the container
 void MagicalContainer::addElement(int elem){
-    int position = contains(elem);
+    int position = findPositionToInsert(elem);
     if(position==-1) return;
-    //__asm__("int3");
     Node<int>* newintnode = new Node<int>(elem);
     Node<int*>* newintstnode = new Node<int*>(newintnode->getDataPoint());
     Node<int>::insertAtPosition(newintnode, position, &(this->ascending));
     Node<int*>::insertAtPosition(newintstnode, num_elem - position, &(this->descending));
     if(isPrime(elem)){
         newintstnode = new Node<int*>(newintnode->getDataPoint());
-        //std::cout << Node<int*>::findPosition(this->prime, newintnode->getDataPoint()) <<std::endl;
         Node<int*>::insertAtPosition(newintstnode, Node<int*>::findPosition(this->prime, newintnode->getDataPoint()) ,&(this->prime));
     }
     this->num_elem++;
@@ -96,7 +102,7 @@ void MagicalContainer::addElement(int elem){
 
 //removing an element from the container
 void MagicalContainer::removeElement(int elem){
-    int elementposition = contains(elem);
+    int elementposition = exists(elem); //if we would have to insert this elem
     if(elementposition == -1) throw std::runtime_error("element doesnt exist in container");
     Node<int>::removeAtPosition(elementposition, &(this->ascending));
     this->num_elem--;
@@ -117,28 +123,24 @@ int MagicalContainer::size(){
 MagicalContainer::AscendingIterator::AscendingIterator(){
     this->cont = nullptr;
     this->current = nullptr;
-    this->type = 1;
 }
 
 //constructor
 MagicalContainer::AscendingIterator::AscendingIterator(const MagicalContainer& magic){
     this->cont = &magic;
     this->current = magic.ascending;
-    this->type = 1;
 }
 
 //copy constructor
 MagicalContainer::AscendingIterator::AscendingIterator(const AscendingIterator& asci){
     this->cont = asci.cont;
     this->current = asci.cont->ascending;
-    this->type = 1;
 }
 
 //move constructor
 MagicalContainer::AscendingIterator::AscendingIterator(AscendingIterator&& asci) noexcept{
     this->cont = asci.cont;
     this->current = asci.cont->ascending;
-    this->type = asci.type;
     asci.cont = nullptr;
     asci.current = nullptr;
 }
@@ -150,18 +152,15 @@ MagicalContainer::AscendingIterator::~AscendingIterator(){
 
 //operator >
 bool MagicalContainer::AscendingIterator::operator>(const AscendingIterator &other) const{
-    if(other.current->getIsFinal() == true && this->current->getIsFinal() == true ) return false;
-    if(other.current->getIsFinal() == true ) return false;
-    if(this->current->getIsFinal()) return true;
-    return this->current>other.current;
+    if(other.current->getIsFinal() == true && this->current->getIsFinal() == true ) return false; //both are at end
+    if(other.current->getIsFinal() == true ) return false; // other at end
+    if(this->current->getIsFinal()) return true; // this at end
+    return *(this->current)>*(other.current);
 }
 
 //operator <
 bool MagicalContainer::AscendingIterator::operator<(const AscendingIterator &other) const{
-    if(other.current->getIsFinal() == true && this->current->getIsFinal() == true ) return false;
-    if(other.current->getIsFinal() == true ) return true;
-    if(this->current->getIsFinal()) return false;
-    return this->current<other.current;
+    return other>(*this);
 }
 
 //operator ==
@@ -190,7 +189,6 @@ MagicalContainer::AscendingIterator &MagicalContainer::AscendingIterator::operat
     if(this->cont != other.cont) throw std::runtime_error("can't assign between two different containers");
     this->cont = other.cont;
     this->current = other.current;
-    this->type = other.type;
     return (*this);
 }
 
@@ -198,7 +196,6 @@ MagicalContainer::AscendingIterator &MagicalContainer::AscendingIterator::operat
 MagicalContainer::AscendingIterator &MagicalContainer::AscendingIterator::operator=(AscendingIterator &&other) noexcept{
     this->cont = other.cont;
     this->current = other.current;
-    this->type = other.type;
     other.cont = nullptr;
     other.current = nullptr;
     return (*this);
@@ -226,7 +223,7 @@ MagicalContainer::AscendingIterator MagicalContainer::AscendingIterator::begin()
 //iterator to the end of the container
 MagicalContainer::AscendingIterator MagicalContainer::AscendingIterator::end(){
     MagicalContainer::AscendingIterator asci(*(this->cont));
-    asci.current = Node<int>::getFinal(this->cont->ascending);
+    asci.current = this->cont->asc_end;
     return asci;
 }
 
@@ -237,28 +234,24 @@ MagicalContainer::AscendingIterator MagicalContainer::AscendingIterator::end(){
 MagicalContainer::PrimeIterator::PrimeIterator(){
     this->cont = nullptr;
     this->current = nullptr;
-    this->type = 2;
 }
 
 //constructor
 MagicalContainer::PrimeIterator::PrimeIterator(const MagicalContainer& magic){
     this->cont = &magic;
     this->current = magic.prime;
-    this->type = 2;
 }
 
 //copy constructor
 MagicalContainer::PrimeIterator::PrimeIterator(const PrimeIterator& prmi){
     this->cont = prmi.cont;
     this->current = prmi.current;
-    this->type = 2;
 }
 
 //move constructor
 MagicalContainer::PrimeIterator::PrimeIterator(PrimeIterator&& prmi) noexcept{
     this->cont = prmi.cont;
     this->current = prmi.cont->prime;
-    this->type = prmi.type;
     prmi.cont = nullptr;
     prmi.current = nullptr;
 }
@@ -270,18 +263,15 @@ MagicalContainer::PrimeIterator::~PrimeIterator(){
 
 //operator >
 bool MagicalContainer::PrimeIterator::operator>(const PrimeIterator &other) const{
-    if(other.current->getIsFinal() == true && this->current->getIsFinal() == true ) return false;
-    if(other.current->getIsFinal() == true ) return false;
-    if(this->current->getIsFinal()) return true;
-    return this->current>other.current;
+    if(other.current->getIsFinal() == true && this->current->getIsFinal() == true ) return false; //this and other are at end
+    if(other.current->getIsFinal() == true ) return false; //other at end
+    if(this->current->getIsFinal()) return true; //this at end
+    return *(this->current)>*(other.current);
 }
 
 //operator <
 bool MagicalContainer::PrimeIterator::operator<(const PrimeIterator &other) const{
-    if(other.current->getIsFinal() == true && this->current->getIsFinal() == true ) return false;
-    if(other.current->getIsFinal() == true ) return true;
-    if(this->current->getIsFinal()) return false;
-    return this->current<other.current;
+    return other>(*this);
 }
 
 //operator ==
@@ -310,7 +300,6 @@ MagicalContainer::PrimeIterator &MagicalContainer::PrimeIterator::operator=(cons
     if(this->cont != other.cont) throw std::runtime_error("can't assign between two different containers");
     this->cont = other.cont;
     this->current = other.current;
-    this->type = other.type;
     return (*this);
 }
 
@@ -318,7 +307,6 @@ MagicalContainer::PrimeIterator &MagicalContainer::PrimeIterator::operator=(cons
 MagicalContainer::PrimeIterator &MagicalContainer::PrimeIterator::operator=(PrimeIterator &&other) noexcept{
     this->cont = other.cont;
     this->current = other.current;
-    this->type = other.type;
     other.cont = nullptr;
     other.current = nullptr;
     return (*this);
@@ -346,20 +334,22 @@ MagicalContainer::PrimeIterator MagicalContainer::PrimeIterator::begin(){
 //iterator to the end of the container
 MagicalContainer::PrimeIterator MagicalContainer::PrimeIterator::end(){
     MagicalContainer::PrimeIterator prmi(*(this->cont));
-    prmi.current = Node<int*>::getFinal(this->cont->prime);
+    prmi.current = this->cont->prime_end;
     return prmi;
 }
 
 
 
-//SideCross class
+//SideCross class - 
+//this class is implemented with two pointers - one to the "beginning of the container" and the other one to the
+// "end of the container" (represented by an ascending and descending liked lists) which are flipped by the boolean is_front.
+
 //default constructor
 MagicalContainer::SideCrossIterator::SideCrossIterator(){
     this->cont = nullptr;
     this->current_front = nullptr;
     this->current_back = nullptr;
     this->is_front = true;
-    this->type = 3;
 }
 
 //constructor
@@ -368,7 +358,6 @@ MagicalContainer::SideCrossIterator::SideCrossIterator(const MagicalContainer& m
     this->current_front = cont->ascending;
     this->current_back = cont->descending;
     this->is_front = true;
-    this->type = 3;
 }
 
 //copy constructor
@@ -377,7 +366,6 @@ MagicalContainer::SideCrossIterator::SideCrossIterator(const SideCrossIterator& 
     this->current_front = sdci.current_front;
     this->current_back = sdci.current_back;
     this->is_front = sdci.is_front;
-    this->type = 3;
 }
 
 //move constructor
@@ -386,7 +374,6 @@ MagicalContainer::SideCrossIterator::SideCrossIterator(SideCrossIterator&& sdci)
     this->current_front = sdci.current_front;
     this->current_back = sdci.current_back;
     this->is_front = sdci.is_front;
-    this->type = 3;
     sdci.cont = nullptr;
     sdci.current_front = nullptr;
     sdci.current_back = nullptr;
@@ -399,57 +386,36 @@ MagicalContainer::SideCrossIterator::~SideCrossIterator(){
 
 //operator >
 bool MagicalContainer::SideCrossIterator::operator>(const SideCrossIterator &other) const{
-    if((other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) && (this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true)) return false;
-    if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return false;
-    if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return true;
-    if(this->is_front && other.is_front){
-        if(this->current_front->getIndex() == 0) return other.current_front->getIndex()==0 ? false : true;
-        return ((2*this->current_front->getIndex())+1) > ((2*other.current_front->getIndex())+1);
-    } else if (this->is_front && (!other.is_front)){
-        if(this->current_front->getIndex()==0) return other.current_back->getIndex()==0 ? false : true;
-        return ((2*this->current_front->getIndex())+1) > (2*other.current_back->getIndex());
-    } else if ((!this->is_front) && other.is_front){
-        if(this->current_back->getIndex() == 0) return other.current_front->getIndex()==0 ? true : false;
-        return (2*this->current_back->getIndex()) > ((2*other.current_front->getIndex())+1);
-    } else{
-        if(this->current_back->getIndex() == 0) return other.current_back->getIndex()==0 ? false : true;
-        return (2*this->current_back->getIndex()) > (2*other.current_back->getIndex());
+    if((other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) && (this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true)) return false; // both this and other at end
+    if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return false; // other at end
+    if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return true; // this at end
+    if(this->is_front && other.is_front){ // both at front
+        if(this->current_front->getIndex() == 0) return other.current_front->getIndex()==0 ? false : true; // special case where this at index 0
+        return this->current_front->getIndex() > other.current_front->getIndex(); // compute by index
+    } else if (this->is_front && (!other.is_front)){ // this at front (went through odd num of elments) other at back (went through even num of elments)
+        if(this->current_front->getIndex()==0) return other.current_back->getIndex()==0 ? false : true; // special case where this at index 0
+        return ((2*this->current_front->getIndex())+1) > (2*other.current_back->getIndex()); // compute by index
+    } else if ((!this->is_front) && other.is_front){ // this at end (went through even num of elments) other at front (went through odd num of elments)
+        if(this->current_back->getIndex() == 0) return other.current_front->getIndex()==0 ? true : false; // special case where this at index 0
+        return (2*this->current_back->getIndex()) > ((2*other.current_front->getIndex())+1); // compute by index
+    } else{ // both at end
+        if(this->current_back->getIndex() == 0) return other.current_back->getIndex()==0 ? false : true; // special case where this at index 0
+        return this->current_back->getIndex() > other.current_back->getIndex(); // compute by index
     }
 }
 
 //operator <
 bool MagicalContainer::SideCrossIterator::operator<(const SideCrossIterator &other) const{
-    if((other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) && (this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true)) return false;
-    if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return true;
-    if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return false;
-    if(this->is_front && other.is_front){
-        if(this->current_front->getIndex() == 0) return other.current_front->getIndex()==0 ? false : true;
-        return ((2*this->current_front->getIndex())+1) < ((2*other.current_front->getIndex())+1);
-    } else if (this->is_front && (!other.is_front)){
-        if(this->current_front->getIndex()==0) return other.current_back->getIndex()==0 ? true : false;
-        return ((2*this->current_front->getIndex())+1) < (2*other.current_back->getIndex());
-    } else if ((!this->is_front) && other.is_front){
-        if(this->current_back->getIndex() == 0) return other.current_front->getIndex()==0 ? false : true;
-        return (2*this->current_back->getIndex()) < ((2*other.current_front->getIndex())+1);
-    } else{
-        if(this->current_back->getIndex() == 0) return other.current_back->getIndex()==0 ? false : true;
-        return (2*this->current_back->getIndex()) < (2*other.current_back->getIndex());
-    }
+    return other>(*this);
 }
 
 //operator ==
 bool MagicalContainer::SideCrossIterator::operator==(const SideCrossIterator &other) const{
-    // if((other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) && (this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true)) return true;
-    // if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return false;
-    // if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return false;
     return !((*this)>other || (*this)<other);
 }
 
 //operator !=
 bool MagicalContainer::SideCrossIterator::operator!=(const SideCrossIterator &other) const{
-    // if((other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) && (this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true)) return false;
-    // if(other.current_back->getIsFinal() == true || other.current_front->getIsFinal() == true) return true;
-    // if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) return true;
     return !((*this)==other);
 }
 
@@ -470,7 +436,6 @@ MagicalContainer::SideCrossIterator &MagicalContainer::SideCrossIterator::operat
     this->current_front = other.current_front;
     this->current_back = other.current_back;
     this->is_front = other.is_front;
-    this->type = 3;
     return (*this);
 }
 
@@ -480,7 +445,6 @@ MagicalContainer::SideCrossIterator &MagicalContainer::SideCrossIterator::operat
     this->current_front = other.current_front;
     this->current_back = other.current_back;
     this->is_front = other.is_front;
-    this->type = other.type;
     other.cont = nullptr;
     other.current_front = nullptr;
     other.current_back = nullptr;
@@ -496,12 +460,10 @@ int MagicalContainer::SideCrossIterator::operator*(){
 
 //++ operator
 MagicalContainer::SideCrossIterator& MagicalContainer::SideCrossIterator::operator++(){
-    // (this->cont->num_elem%2 == 1) &&
-    // std::cout << this->current_front->getIndex() << "   " <<this->current_back->getIndex() << std::endl;
     if(this->current_back->getIsFinal() == true || this->current_front->getIsFinal() == true) throw std::runtime_error("out of range");
-    if(this->current_back->getIndex() + this->current_front->getIndex() >= this->cont->num_elem-1){
-        this->current_back = Node<int*>::getFinal(this->cont->descending); 
-        this->current_front = Node<int>::getFinal(this->cont->ascending);
+    if(this->current_back->getIndex() + this->current_front->getIndex() >= this->cont->num_elem-1){ // covered all elements
+        this->current_back = this->cont->desc_end; // get both back
+        this->current_front = this->cont->asc_end; // and front to be end
         return (*this);
     }
     if(this->is_front) {
@@ -512,12 +474,6 @@ MagicalContainer::SideCrossIterator& MagicalContainer::SideCrossIterator::operat
         this->current_back = current_back->getNext();
         this->is_front = true;
     }
-    //if((this->cont->num_elem%2==1 && this->current_back->getIndex()==(this->cont->num_elem/2)) && ((this->current_front->getIndex()==this->cont->num_elem/2)+1)){
-    // if(this->current_back->getIndex() + this->current_front->getIndex() >= this->cont->num_elem){
-    //     this->current_back = Node<int*>::getFinal(this->cont->descending); 
-    //     this->current_front = Node<int>::getFinal(this->cont->ascending);
-    // }
-    // std::cout << this->current_front->getIndex() << "   " <<this->current_back->getIndex() << std::endl;
     return (*this);
 }
 
@@ -530,7 +486,7 @@ MagicalContainer::SideCrossIterator MagicalContainer::SideCrossIterator::begin()
 //iterator to the end of the container
 MagicalContainer::SideCrossIterator MagicalContainer::SideCrossIterator::end(){
     MagicalContainer::SideCrossIterator sdci(*(this->cont));
-    sdci.current_front = Node<int>::getFinal(this->cont->ascending);
-    sdci.current_back = Node<int*>::getFinal(this->cont->descending);
+    sdci.current_front = this->cont->asc_end;
+    sdci.current_back = this->cont->desc_end;
     return sdci;
 }
